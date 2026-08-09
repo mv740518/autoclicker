@@ -5,6 +5,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,8 +34,21 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 若已存在同版本发布则先删除，保证可重复构建
+          gh release delete v1.3 -y || true
+          git push --delete origin v1.3 || true
+          gh release create v1.3 \
+            app/build/outputs/apk/debug/app-debug.apk \
+            --title "v1.3" \
+            --notes "修复权限检测（悬浮窗真实探测 + 无障碍宽松匹配）；新增「点哪选哪」屏幕选点。" \
+            --latest
