@@ -53,6 +53,7 @@ fi
 # Escape application args
 save () {
     for i do printf %s\\n "$i" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'\\\\''/"
+    done
 }
 ALL_ARGS=$( save "$@" )
 eval "set -- $ALL_ARGS"
