@@ -40,7 +40,8 @@ fun HomeScreen(
     isAccessibilityEnabled: Boolean,
     onRequestOverlayPermission: () -> Unit,
     onRequestAccessibilityPermission: () -> Unit,
-    onStartFloatingWindow: () -> Unit
+    onStartFloatingWindow: () -> Unit,
+    onCaptureTap: (Long?) -> Unit
 ) {
     val steps by viewModel.steps.collectAsState()
     val loopCount by viewModel.loopCount.collectAsState()
@@ -58,17 +59,7 @@ fun HomeScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = {
-                    val screenW = 540f
-                    val screenH = 960f
-                    viewModel.addStep(
-                        ClickStep(
-                            x = screenW + steps.size * 50,
-                            y = screenH,
-                            waitAfterMs = 1000L
-                        )
-                    )
-                },
+                onClick = { onCaptureTap(null) },
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
                 text = { Text("添加步骤") }
             )
@@ -124,6 +115,8 @@ fun HomeScreen(
                     StepCard(
                         index = index,
                         step = step,
+                        canPickLocation = hasOverlayPermission,
+                        onPickLocation = { onCaptureTap(step.id) },
                         onMoveUp = { if (index > 0) viewModel.moveStep(index, index - 1) },
                         onMoveDown = { if (index < steps.size - 1) viewModel.moveStep(index, index + 1) },
                         onRemove = { viewModel.removeStep(step.id) },
@@ -316,6 +309,8 @@ private fun AdvancedSettingsCard(
 private fun StepCard(
     index: Int,
     step: ClickStep,
+    canPickLocation: Boolean,
+    onPickLocation: () -> Unit,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
     onRemove: () -> Unit,
@@ -374,6 +369,22 @@ private fun StepCard(
                     )
                     Text("ms", style = MaterialTheme.typography.bodySmall)
                 }
+                Spacer(modifier = Modifier.height(4.dp))
+                // 点哪选哪：直接在屏幕上点选该步坐标
+                OutlinedButton(
+                    onClick = onPickLocation,
+                    enabled = canPickLocation,
+                    modifier = Modifier.height(32.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("选取位置", style = MaterialTheme.typography.bodySmall)
+                }
             }
 
             // 排序按钮
@@ -415,13 +426,13 @@ private fun EmptyStepsHint() {
             Text("还没有步骤", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                "点击右下角\"添加步骤\"按钮来创建动作",
+                "点右下角\"添加步骤\"，再在屏幕上点一下目标位置即可",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "启动后拖拽准星到目标位置即可定位",
+                "启动悬浮窗后仍可拖拽准星微调；点\"选取位置\"可重新选点",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

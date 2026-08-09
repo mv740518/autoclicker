@@ -70,6 +70,15 @@ class ClickerViewModel : ViewModel() {
     }
 
     /**
+     * 仅更新指定步骤的点击坐标（供「点哪选哪」选点后调用）
+     */
+    fun updateStepPosition(stepId: Long, x: Float, y: Float) {
+        _steps.value = _steps.value.map {
+            if (it.id == stepId) it.copy(x = x, y = y) else it
+        }
+    }
+
+    /**
      * 删除指定步骤
      */
     fun removeStep(stepId: Long) {

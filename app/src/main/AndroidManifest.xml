@@ -54,5 +54,10 @@
                 android:value="Floating window for auto-click control panel" />
         </service>
 
+        <!-- 透明全屏选点服务（点哪选哪） -->
+        <service
+            android:name=".service.TapCaptureService"
+            android:exported="false" />
+
     </application>
 </manifest>
