@@ -1,6 +1,7 @@
 package com.example.autoclicker.util
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.PixelFormat
 import android.os.Build
 import android.provider.Settings
@@ -126,6 +127,52 @@ object PermissionUtils {
             context.contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         ) ?: "(null)"
+    }
+
+    /**
+     * 获取本应用的安装来源包名（调试展示用）
+     */
+    fun getInstallSource(context: Context): String {
+        return try {
+            val pm = context.packageManager
+            val pkg = context.packageName
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                pm.getInstallSourceInfo(pkg).initiatingPackageName ?: "(null)"
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getInstallerPackageName(pkg) ?: "(null)"
+            }
+        } catch (e: Exception) {
+            "(unknown:${e.message})"
+        }
+    }
+
+    /**
+     * 是否「非可信安装源」（即 Android 12+ 受限设置可能拦截无障碍开关）
+     *
+     * Android 12 起，系统对「未知来源」安装的 APK 默认禁止开启无障碍等敏感权限，
+     * 并在设置里报「未知来源应用，系统已拒绝此应用获取敏感权限」。
+     *
+     * 只有经可信安装源安装才不拦截：
+     *  - adb（com.android.shell）
+     *  - Google Play（com.android.vending）等预授权商店
+     * 其余（系统安装器 / 浏览器下载 / 文件管理器侧载等）均视为未知来源 → 可能受限。
+     */
+    fun fromUnknownSource(context: Context): Boolean {
+        return try {
+            val pm = context.packageManager
+            val pkg = context.packageName
+            val installer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                pm.getInstallSourceInfo(pkg).initiatingPackageName
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getInstallerPackageName(pkg)
+            }
+            val trusted = setOf("com.android.shell", "com.android.vending")
+            installer.isNullOrEmpty() || installer !in trusted
+        } catch (e: Exception) {
+            true // 无法判定时保守提示
+        }
     }
 
     /**

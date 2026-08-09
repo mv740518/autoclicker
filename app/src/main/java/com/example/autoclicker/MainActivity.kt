@@ -64,6 +64,7 @@ class MainActivity : ComponentActivity() {
                     debug = debug,
                     onRequestOverlayPermission = { requestOverlayPermission() },
                     onRequestAccessibilityPermission = { openAccessibilitySettings() },
+                    onOpenAppDetails = { openAppDetails() },
                     onRefreshPermissions = { appViewModel.updatePermissionState(this) },
                     onStartFloatingWindow = { startFloatingWindow(appViewModel) },
                     onCaptureTap = { startTapCapture(it) }
@@ -107,6 +108,19 @@ class MainActivity : ComponentActivity() {
 
     private fun openAccessibilitySettings() {
         startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+    }
+
+    /**
+     * 跳转到本应用的「应用信息」页。
+     * 在 Android 12+ 上，侧载(未知来源)安装的 APK 默认被「受限设置」禁止开启无障碍服务，
+     * 需在此页面右上角 ⋮ →「允许受限设置」后，才能在无障碍设置里打开本应用开关。
+     */
+    private fun openAppDetails() {
+        val intent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.parse("package:$packageName")
+        )
+        startActivity(intent)
     }
 
     /**

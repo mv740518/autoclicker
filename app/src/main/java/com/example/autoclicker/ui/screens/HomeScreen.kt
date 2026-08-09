@@ -41,6 +41,7 @@ fun HomeScreen(
     debug: ClickerViewModel.PermissionDebug?,
     onRequestOverlayPermission: () -> Unit,
     onRequestAccessibilityPermission: () -> Unit,
+    onOpenAppDetails: () -> Unit,
     onRefreshPermissions: () -> Unit,
     onStartFloatingWindow: () -> Unit,
     onCaptureTap: (Long?) -> Unit
@@ -84,6 +85,7 @@ fun HomeScreen(
                 debug = debug,
                 onRequestOverlayPermission = onRequestOverlayPermission,
                 onRequestAccessibilityPermission = onRequestAccessibilityPermission,
+                onOpenAppDetails = onOpenAppDetails,
                 onRefreshPermissions = onRefreshPermissions
             )
 
@@ -180,6 +182,7 @@ private fun PermissionCard(
     debug: ClickerViewModel.PermissionDebug?,
     onRequestOverlayPermission: () -> Unit,
     onRequestAccessibilityPermission: () -> Unit,
+    onOpenAppDetails: () -> Unit,
     onRefreshPermissions: () -> Unit
 ) {
     var showDebug by remember { mutableStateOf(false) }
@@ -206,11 +209,24 @@ private fun PermissionCard(
             }
 
             PermissionRow("悬浮窗权限", hasOverlayPermission, onRequestOverlayPermission)
-            PermissionRow("无障碍服务", isAccessibilityEnabled, onRequestAccessibilityPermission)
+            // 无障碍行：未授权时额外提供「应用信息」入口（用于解除 Android 12+ 受限设置）
+            PermissionRow(
+                label = "无障碍服务",
+                granted = isAccessibilityEnabled,
+                onRequest = onRequestAccessibilityPermission,
+                trailingExtra = if (!isAccessibilityEnabled) {
+                    { TextButton(onClick = onOpenAppDetails) { Text("应用信息") } }
+                } else null
+            )
 
             // 已开启其他无障碍服务、但没开我们时的关键提示
             if (!isAccessibilityEnabled && debug?.accessibilityOthersEnabled == true) {
                 OthersEnabledWarning()
+            }
+
+            // 侧载(未知来源)导致的「受限设置」拦截提示——这是 Android 12+ 无法开启无障碍的根因
+            if (!isAccessibilityEnabled && debug?.fromUnknownSource == true) {
+                RestrictedSettingsWarning(onOpenAppDetails = onOpenAppDetails)
             }
 
             // 调试信息（排查「已授权却显示未授权」）
@@ -221,6 +237,53 @@ private fun PermissionCard(
                 DebugInfo(debug)
             }
         }
+    }
+}
+
+@Composable
+private fun RestrictedSettingsWarning(onOpenAppDetails: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Color(0xFFFDE7E9),
+                MaterialTheme.shapes.small
+            )
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Text(
+            "⛔ 系统已拦截本应用开启无障碍服务（未知来源安装限制）",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFFB71C1C.toInt())
+        )
+        Text(
+            "你看到的「未知来源应用，系统已拒绝此应用获取敏感权限」即由此引起。两步即可解决：",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color(0xFFB71C1C.toInt())
+        )
+        Text(
+            "① 点下方「应用信息」→ 右上角 ⋮ →「允许受限设置」；\n" +
+                "② 返回后再在「去授权」里打开 Auto Clicker 开关即可。",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color(0xFFB71C1C.toInt())
+        )
+        Button(
+            onClick = onOpenAppDetails,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFB71C1C.toInt()),
+                contentColor = Color.White
+            )
+        ) {
+            Text("前往应用信息（允许受限设置）")
+        }
+        Text(
+            "💡 一劳永逸方案：用电脑 `adb install` 安装本 APK，即视为可信安装源，不再受此限制。详见 v1.6 更新说明。",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color(0xFF8A6D3B.toInt())
+        )
     }
 }
 
@@ -273,6 +336,10 @@ private fun DebugInfo(debug: ClickerViewModel.PermissionDebug) {
             style = MaterialTheme.typography.bodySmall
         )
         Text(
+            "安装来源(是否未知来源/受限设置拦截): ${debug.installSource} / ${debug.fromUnknownSource}",
+            style = MaterialTheme.typography.bodySmall
+        )
+        Text(
             "无障碍 启用列表原始值:",
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Bold
@@ -283,7 +350,7 @@ private fun DebugInfo(debug: ClickerViewModel.PermissionDebug) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
-            "把以上 5 行截图或发给我，即可精准定位。",
+            "把以上行截图或发给我，即可精准定位。",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error
         )
@@ -291,7 +358,12 @@ private fun DebugInfo(debug: ClickerViewModel.PermissionDebug) {
 }
 
 @Composable
-private fun PermissionRow(label: String, granted: Boolean, onRequest: () -> Unit) {
+private fun PermissionRow(
+    label: String,
+    granted: Boolean,
+    onRequest: () -> Unit,
+    trailingExtra: (@Composable () -> Unit)? = null
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -313,8 +385,11 @@ private fun PermissionRow(label: String, granted: Boolean, onRequest: () -> Unit
                 color = if (granted) Color(0xFF2E7D32) else Color(0xFFC62828)
             )
         }
-        if (!granted) {
-            TextButton(onClick = onRequest) { Text("去授权") }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            trailingExtra?.invoke()
+            if (!granted) {
+                TextButton(onClick = onRequest) { Text("去授权") }
+            }
         }
     }
 }

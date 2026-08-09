@@ -62,7 +62,9 @@ class ClickerViewModel : ViewModel() {
         val accessibilityActive: Boolean,
         val accessibilityRaw: String,
         val accessibilityContainsOurs: Boolean,
-        val accessibilityOthersEnabled: Boolean
+        val accessibilityOthersEnabled: Boolean,
+        val fromUnknownSource: Boolean,
+        val installSource: String
     )
 
     private val _debug = MutableStateFlow<PermissionDebug?>(null)
@@ -160,7 +162,9 @@ class ClickerViewModel : ViewModel() {
             accessibilityActive = PermissionUtils.isAccessibilityServiceActive(),
             accessibilityRaw = raw,
             accessibilityContainsOurs = containsOurs,
-            accessibilityOthersEnabled = listNotEmpty && !containsOurs
+            accessibilityOthersEnabled = listNotEmpty && !containsOurs,
+            fromUnknownSource = PermissionUtils.fromUnknownSource(context),
+            installSource = PermissionUtils.getInstallSource(context)
         )
     }
 

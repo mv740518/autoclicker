@@ -62,6 +62,7 @@ app/src/main/java/com/example/autoclicker/
 3. Android 14+ 需声明 foregroundServiceType="specialUse"
 4. 拖拽准星时点击坐标会实时更新
 5. 可选设置随机偏移来防检测
+6. **Android 12+ 侧载安装会触发「受限设置」**：通过浏览器下载 APK 再安装的应用，系统默认禁止开启无障碍服务，会弹「未知来源应用，系统已拒绝此应用获取敏感权限」。解决：进入「应用信息」页 ⋮ →「允许受限设置」后再开开关；或改用电脑端 `adb install` 安装（可信来源，永久不受限）。详见各版本更新说明。
 
 ---
 
