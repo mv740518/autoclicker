@@ -60,7 +60,9 @@ class ClickerViewModel : ViewModel() {
         val overlayApi: Boolean,
         val overlayDraw: Boolean,
         val accessibilityActive: Boolean,
-        val accessibilityRaw: String
+        val accessibilityRaw: String,
+        val accessibilityContainsOurs: Boolean,
+        val accessibilityOthersEnabled: Boolean
     )
 
     private val _debug = MutableStateFlow<PermissionDebug?>(null)
@@ -149,11 +151,16 @@ class ClickerViewModel : ViewModel() {
         val overlay = PermissionUtils.overlayDebug(context)
         _hasOverlayPermission.value = overlay.apiCanDraw || overlay.drawTestOk
         _isAccessibilityEnabled.value = PermissionUtils.isAccessibilityServiceEnabled(context)
+        val raw = PermissionUtils.getEnabledAccessibilityServicesRaw(context)
+        val listNotEmpty = raw.isNotEmpty() && raw != "(null)"
+        val containsOurs = raw.contains("AutoClickService", ignoreCase = true)
         _debug.value = PermissionDebug(
             overlayApi = overlay.apiCanDraw,
             overlayDraw = overlay.drawTestOk,
             accessibilityActive = PermissionUtils.isAccessibilityServiceActive(),
-            accessibilityRaw = PermissionUtils.getEnabledAccessibilityServicesRaw(context)
+            accessibilityRaw = raw,
+            accessibilityContainsOurs = containsOurs,
+            accessibilityOthersEnabled = listNotEmpty && !containsOurs
         )
     }
 

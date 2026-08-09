@@ -45,10 +45,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # 若已存在同版本发布则先删除，保证可重复构建
-          gh release delete v1.4 -y || true
-          git push --delete origin v1.4 || true
-          gh release create v1.4 \
+          gh release delete v1.5 -y || true
+          git push --delete origin v1.5 || true
+          gh release create v1.5 \
             app/build/outputs/apk/debug/app-debug.apk \
-            --title "v1.4" \
-            --notes "新增权限检测调试信息面板（排查「已授权却显示未授权」）；保留悬浮窗实绘探测与无障碍宽松匹配；保留「点哪选哪」屏幕选点。" \
+            --title "v1.5" \
+            --notes "关键修复：已开启其他无障碍服务、但没开启 Auto Clicker 时，在权限卡片红字明确提示（避免误开系统「无障碍菜单」却以为已授权）。" \
             --latest

@@ -208,6 +208,11 @@ private fun PermissionCard(
             PermissionRow("悬浮窗权限", hasOverlayPermission, onRequestOverlayPermission)
             PermissionRow("无障碍服务", isAccessibilityEnabled, onRequestAccessibilityPermission)
 
+            // 已开启其他无障碍服务、但没开我们时的关键提示
+            if (!isAccessibilityEnabled && debug?.accessibilityOthersEnabled == true) {
+                OthersEnabledWarning()
+            }
+
             // 调试信息（排查「已授权却显示未授权」）
             TextButton(onClick = { showDebug = !showDebug }) {
                 Text(if (showDebug) "收起调试信息 ▲" else "调试信息（若仍显示未授权请展开）▼")
@@ -216,6 +221,33 @@ private fun PermissionCard(
                 DebugInfo(debug)
             }
         }
+    }
+}
+
+@Composable
+private fun OthersEnabledWarning() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Color(0xFFFFF3CD),
+                MaterialTheme.shapes.small
+            )
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            "⚠ 您已开启其他无障碍服务，但 Auto Clicker 的无障碍服务尚未开启",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF8A6D3B.toInt())
+        )
+        Text(
+            "请在无障碍设置列表中下拉找到「Auto Clicker」(或「com.example.autoclicker」)，" +
+                "点进去并打开开关。系统自带的「无障碍菜单」不是我们要用的服务。",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color(0xFF8A6D3B.toInt())
+        )
     }
 }
 
