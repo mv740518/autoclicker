@@ -45,10 +45,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # 若已存在同版本发布则先删除，保证可重复构建
-          gh release delete v1.7.1 -y || true
-          git push --delete origin v1.7.1 || true
-          gh release create v1.7.1 \
+          gh release delete v1.7.2 -y || true
+          git push --delete origin v1.7.2 || true
+          gh release create v1.7.2 \
             app/build/outputs/apk/debug/app-debug.apk \
-            --title "v1.7.1" \
-            --notes "修复：悬浮窗权限（Overlay）未授予时，「添加步骤」会静默失败、选点悬浮按钮不弹出。现改为：未授予悬浮窗权限时点「添加步骤」直接跳去开权限；开启选点后弹 Toast 提示确认。选点流程不变（悬浮「⊕ 选点」→ 点位置出黄色十字光标 → 保存/重选）。" \
+            --title "v1.7.2" \
+            --notes "选点遮罩顶部的说明条改为可折叠：默认展开看说明，点「收起」缩成小按钮不再遮挡要选的位置；点「说明」可重新展开。悬浮窗权限缺失时的 FAB 跳转与开启 Toast 提示保留。" \
             --latest

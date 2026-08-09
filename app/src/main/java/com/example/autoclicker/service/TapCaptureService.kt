@@ -55,6 +55,8 @@ class TapCaptureService : Service() {
     private var cursorView: CursorView? = null
     private var confirmBar: LinearLayout? = null
     private var banner: TextView? = null
+    private var bannerToggleBtn: Button? = null
+    private var bannerExpanded = true
 
     private var selectedX = 0
     private var selectedY = 0
@@ -158,21 +160,38 @@ class TapCaptureService : Service() {
 
         val root = CaptureLayout(this) { x, y -> onScreenTap(x, y) }
 
-        // 顶部提示横幅
+        // 顶部提示横幅（可折叠，避免遮挡要选的位置）
         val topBar = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(Color.parseColor("#CC000000"))
-            setPadding(20, 20, 20, 20)
+            setPadding(12, 10, 12, 10)
             isClickable = true // 横幅自身消费触摸，避免误触发选点
         }
-        banner = TextView(this).apply {
-            text = "① 点击屏幕选择位置（会出现黄色十字光标）"
-            setTextColor(Color.WHITE)
-            textSize = 15f
-            setTypeface(null, Typeface.BOLD)
-            gravity = Gravity.CENTER
+        val headerRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
         }
-        topBar.addView(banner)
+        banner = TextView(this).apply {
+            text = "① 点屏幕选位置（出现黄色十字光标）"
+            setTextColor(Color.WHITE)
+            textSize = 14f
+            setTypeface(null, Typeface.BOLD)
+            gravity = Gravity.CENTER_VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        bannerToggleBtn = Button(this).apply {
+            text = "收起"
+            textSize = 12f
+            setPadding(12, 4, 12, 4)
+            setOnClickListener { toggleBanner() }
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { setMargins(8, 0, 0, 0) }
+        }
+        headerRow.addView(banner)
+        headerRow.addView(bannerToggleBtn)
+        topBar.addView(headerRow)
 
         // 底部操作栏：保存 / 重选 / 关闭（选点后才显示）
         confirmBar = LinearLayout(this).apply {
@@ -238,6 +257,12 @@ class TapCaptureService : Service() {
         placeCursor(selectedX, selectedY)
         banner?.text = "② 已选好位置，点「保存」确认，或「重选」重选"
         confirmBar?.visibility = View.VISIBLE
+    }
+
+    private fun toggleBanner() {
+        bannerExpanded = !bannerExpanded
+        banner?.visibility = if (bannerExpanded) View.VISIBLE else View.GONE
+        bannerToggleBtn?.text = if (bannerExpanded) "收起" else "说明"
     }
 
     private fun placeCursor(x: Int, y: Int) {
