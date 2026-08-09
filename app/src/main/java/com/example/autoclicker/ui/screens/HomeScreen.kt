@@ -62,7 +62,10 @@ fun HomeScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { onCaptureTap(null) },
+                onClick = {
+                    // 选点依赖悬浮窗权限；未授予时直接跳去开权限，避免静默失败
+                    if (hasOverlayPermission) onCaptureTap(null) else onRequestOverlayPermission()
+                },
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
                 text = { Text("添加步骤") }
             )

@@ -11,6 +11,7 @@ import android.graphics.Typeface
 import android.os.Build
 import android.os.IBinder
 import android.view.Gravity
+import android.widget.Toast
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -126,6 +127,12 @@ class TapCaptureService : Service() {
         wm.addView(pill, params)
         pill.layoutParams = params
         triggerView = pill
+        // 反馈：确认选点已开启，并提示用法（若没看到此提示，说明悬浮窗权限未授予）
+        Toast.makeText(
+            applicationContext,
+            "选点已开启：切到目标 App 后，点悬浮的「⊕ 选点」按钮",
+            Toast.LENGTH_LONG
+        ).show()
     }
 
     private fun movePill(pill: View, dx: Int, dy: Int) {

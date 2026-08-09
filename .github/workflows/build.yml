@@ -45,10 +45,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # 若已存在同版本发布则先删除，保证可重复构建
-          gh release delete v1.7 -y || true
-          git push --delete origin v1.7 || true
-          gh release create v1.7 \
+          gh release delete v1.7.1 -y || true
+          git push --delete origin v1.7.1 || true
+          gh release create v1.7.1 \
             app/build/outputs/apk/debug/app-debug.apk \
-            --title "v1.7" \
-            --notes "1) 选点体验重做：悬浮「⊕ 选点」开启按钮 → 在目标 App 中点一下出现黄色十字光标 → 点「保存」确认（可「重选」重选），保存后悬浮按钮仍在可继续添加下一个位置；光标明确标识已选/未选。2) 延续 v1.6 的 Android 12+ 受限设置修复（应用信息直达 + 未知来源检测提示）。" \
+            --title "v1.7.1" \
+            --notes "修复：悬浮窗权限（Overlay）未授予时，「添加步骤」会静默失败、选点悬浮按钮不弹出。现改为：未授予悬浮窗权限时点「添加步骤」直接跳去开权限；开启选点后弹 Toast 提示确认。选点流程不变（悬浮「⊕ 选点」→ 点位置出黄色十字光标 → 保存/重选）。" \
             --latest
