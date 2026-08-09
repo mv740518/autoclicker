@@ -38,8 +38,10 @@ fun HomeScreen(
     viewModel: ClickerViewModel,
     hasOverlayPermission: Boolean,
     isAccessibilityEnabled: Boolean,
+    debug: ClickerViewModel.PermissionDebug?,
     onRequestOverlayPermission: () -> Unit,
     onRequestAccessibilityPermission: () -> Unit,
+    onRefreshPermissions: () -> Unit,
     onStartFloatingWindow: () -> Unit,
     onCaptureTap: (Long?) -> Unit
 ) {
@@ -79,8 +81,10 @@ fun HomeScreen(
             PermissionCard(
                 hasOverlayPermission = hasOverlayPermission,
                 isAccessibilityEnabled = isAccessibilityEnabled,
+                debug = debug,
                 onRequestOverlayPermission = onRequestOverlayPermission,
-                onRequestAccessibilityPermission = onRequestAccessibilityPermission
+                onRequestAccessibilityPermission = onRequestAccessibilityPermission,
+                onRefreshPermissions = onRefreshPermissions
             )
 
             HorizontalDivider()
@@ -173,9 +177,13 @@ fun HomeScreen(
 private fun PermissionCard(
     hasOverlayPermission: Boolean,
     isAccessibilityEnabled: Boolean,
+    debug: ClickerViewModel.PermissionDebug?,
     onRequestOverlayPermission: () -> Unit,
-    onRequestAccessibilityPermission: () -> Unit
+    onRequestAccessibilityPermission: () -> Unit,
+    onRefreshPermissions: () -> Unit
 ) {
+    var showDebug by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -188,11 +196,65 @@ private fun PermissionCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("权限状态", style = MaterialTheme.typography.titleMedium)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("权限状态", style = MaterialTheme.typography.titleMedium)
+                TextButton(onClick = onRefreshPermissions) { Text("重新检测") }
+            }
 
             PermissionRow("悬浮窗权限", hasOverlayPermission, onRequestOverlayPermission)
             PermissionRow("无障碍服务", isAccessibilityEnabled, onRequestAccessibilityPermission)
+
+            // 调试信息（排查「已授权却显示未授权」）
+            TextButton(onClick = { showDebug = !showDebug }) {
+                Text(if (showDebug) "收起调试信息 ▲" else "调试信息（若仍显示未授权请展开）▼")
+            }
+            if (showDebug && debug != null) {
+                DebugInfo(debug)
+            }
         }
+    }
+}
+
+@Composable
+private fun DebugInfo(debug: ClickerViewModel.PermissionDebug) {
+    val raw = debug.accessibilityRaw
+    val containsUs = raw.contains("AutoClickService", ignoreCase = true)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant,
+                MaterialTheme.shapes.small
+            )
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text("悬浮窗 canDrawOverlays: ${debug.overlayApi}", style = MaterialTheme.typography.bodySmall)
+        Text("悬浮窗 实绘探测: ${debug.overlayDraw}", style = MaterialTheme.typography.bodySmall)
+        Text("无障碍 实例存活: ${debug.accessibilityActive}", style = MaterialTheme.typography.bodySmall)
+        Text(
+            "无障碍 启用列表是否含本服务: $containsUs",
+            style = MaterialTheme.typography.bodySmall
+        )
+        Text(
+            "无障碍 启用列表原始值:",
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            if (raw.length > 400) raw.take(400) + " …(已截断)" else raw,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            "把以上 5 行截图或发给我，即可精准定位。",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error
+        )
     }
 }
 

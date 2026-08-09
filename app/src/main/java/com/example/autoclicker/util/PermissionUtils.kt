@@ -31,6 +31,16 @@ object PermissionUtils {
     }
 
     /**
+     * 悬浮窗权限详细诊断（供调试面板展示）
+     */
+    data class OverlayDebug(val apiCanDraw: Boolean, val drawTestOk: Boolean)
+    fun overlayDebug(context: Context): OverlayDebug {
+        val api = Settings.canDrawOverlays(context)
+        val draw = tryDrawTestOverlay(context)
+        return OverlayDebug(api, draw)
+    }
+
+    /**
      * 尝试真实添加并立即移除一个 1px 悬浮窗，用于确认是否真的拥有悬浮窗权限。
      */
     private fun tryDrawTestOverlay(context: Context): Boolean {
@@ -105,6 +115,17 @@ object PermissionUtils {
             }
         }
         return false
+    }
+
+    /** 无障碍服务实例当前是否存活（运行时最真实状态） */
+    fun isAccessibilityServiceActive(): Boolean = AutoClickService.isActive()
+
+    /** 系统设置里「已启用的无障碍服务」原始字符串（调试用） */
+    fun getEnabledAccessibilityServicesRaw(context: Context): String {
+        return Settings.Secure.getString(
+            context.contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ) ?: "(null)"
     }
 
     /**

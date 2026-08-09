@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.example.autoclicker.model.ClickStep
 import com.example.autoclicker.model.ClickTask
+import com.example.autoclicker.service.AutoClickService
 import com.example.autoclicker.util.PermissionUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,6 +51,20 @@ class ClickerViewModel : ViewModel() {
 
     private val _isAccessibilityEnabled = MutableStateFlow(false)
     val isAccessibilityEnabled: StateFlow<Boolean> = _isAccessibilityEnabled.asStateFlow()
+
+    // endregion
+
+    // region — 调试信息（权限检测原始值，便于排查「已授权却显示未授权」）
+
+    data class PermissionDebug(
+        val overlayApi: Boolean,
+        val overlayDraw: Boolean,
+        val accessibilityActive: Boolean,
+        val accessibilityRaw: String
+    )
+
+    private val _debug = MutableStateFlow<PermissionDebug?>(null)
+    val debug: StateFlow<PermissionDebug?> = _debug.asStateFlow()
 
     // endregion
 
@@ -131,8 +146,15 @@ class ClickerViewModel : ViewModel() {
     // region — 权限检查
 
     fun updatePermissionState(context: Context) {
-        _hasOverlayPermission.value = PermissionUtils.hasOverlayPermission(context)
+        val overlay = PermissionUtils.overlayDebug(context)
+        _hasOverlayPermission.value = overlay.apiCanDraw || overlay.drawTestOk
         _isAccessibilityEnabled.value = PermissionUtils.isAccessibilityServiceEnabled(context)
+        _debug.value = PermissionDebug(
+            overlayApi = overlay.apiCanDraw,
+            overlayDraw = overlay.drawTestOk,
+            accessibilityActive = PermissionUtils.isAccessibilityServiceActive(),
+            accessibilityRaw = PermissionUtils.getEnabledAccessibilityServicesRaw(context)
+        )
     }
 
     // endregion

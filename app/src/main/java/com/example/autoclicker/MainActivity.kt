@@ -55,13 +55,16 @@ class MainActivity : ComponentActivity() {
                 appViewModel = viewModel()
                 val hasOverlayPermission by appViewModel.hasOverlayPermission.collectAsState()
                 val isAccessibilityEnabled by appViewModel.isAccessibilityEnabled.collectAsState()
+                val debug by appViewModel.debug.collectAsState()
 
                 HomeScreen(
                     viewModel = appViewModel,
                     hasOverlayPermission = hasOverlayPermission,
                     isAccessibilityEnabled = isAccessibilityEnabled,
+                    debug = debug,
                     onRequestOverlayPermission = { requestOverlayPermission() },
                     onRequestAccessibilityPermission = { openAccessibilitySettings() },
+                    onRefreshPermissions = { appViewModel.updatePermissionState(this) },
                     onStartFloatingWindow = { startFloatingWindow(appViewModel) },
                     onCaptureTap = { startTapCapture(it) }
                 )
