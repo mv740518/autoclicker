@@ -595,13 +595,13 @@ private fun EmptyStepsHint() {
             Text("还没有步骤", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                "点右下角\"添加步骤\"，再在屏幕上点一下目标位置即可",
+                "点右下角「添加步骤」→ 屏幕上出现悬浮「⊕ 选点」按钮 → 切到目标 App → 点它进入选点 → 在目标位置点一下出现黄色十字光标 → 点「保存」",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "启动悬浮窗后仍可拖拽准星微调；点\"选取位置\"可重新选点",
+                "保存后悬浮「选点」按钮仍在，可继续添加下一个位置；点按钮上的「✕」结束选点。启动悬浮窗后仍可拖拽准星微调。",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
