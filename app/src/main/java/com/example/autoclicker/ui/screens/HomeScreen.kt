@@ -14,7 +14,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Infinity
+import androidx.compose.material.icons.filled.AllInclusive
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.*
@@ -257,7 +257,7 @@ private fun LoopSettingsCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Infinity, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.AllInclusive, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("无限循环")
                 }
