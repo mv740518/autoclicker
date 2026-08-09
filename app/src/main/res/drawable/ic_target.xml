@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 十字准星线 -->
+    <path
+        android:strokeColor="#FF0000"
+        android:strokeWidth="1.5"
+        android:pathData="M12,1L12,5M12,19L12,23M1,12L5,12M19,12L23,12" />
+    <!-- 准星圆环 -->
+    <path
+        android:strokeColor="#FF0000"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:pathData="M12,7A5,5 0,1 1,12 17A5,5 0,1 1,12 7Z" />
+    <!-- 中心点 -->
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M12,11A1,1 0,1 1,12 13A1,1 0,1 1,12 11Z" />
+</vector>

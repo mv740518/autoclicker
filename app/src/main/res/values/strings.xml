@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Auto Clicker</string>
+    <string name="accessibility_service_label">Auto Clicker</string>
+    <string name="accessibility_service_description">此服务用于模拟屏幕点击操作，实现自动点击功能。请在需要自动点击的场景中启用此服务。</string>
+</resources>
